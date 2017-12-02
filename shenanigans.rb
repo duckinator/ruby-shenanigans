@@ -1,5 +1,23 @@
 #!/usr/bin/env ruby
 
+class Any
+  def ===(arg)
+    true
+  end
+
+  def self.===(arg)
+    true
+  end
+end
+class AnyOf < Array
+  def self.[](*args)
+    self.new(args)
+  end
+
+  def ===(arg)
+    include?(arg)
+  end
+end
 module Kernel
   def argy(name)
     return self.class.send(__method__, name) unless self.is_a?(Module)
@@ -20,10 +38,21 @@ module Kernel
       method_.bind(self).call(*arg_values)
     end
   end
+
+  def validate(*assertions, arguments)
+    assertions.zip(arguments).each do |assertion, (_, argument)|
+      unless assertion === argument
+        raise ArgumentError, "expected #{assertion}, got #{argument.inspect}"
+      end
+    end
+
+    true
+  end
 end
 
 argy def foo(a, b, c, d)
-  arguments
+  validate(String, Numeric, Any, AnyOf[nil, 4],
+            arguments)
 end
 
 class Foo
@@ -32,5 +61,7 @@ class Foo
   end
 end
 
+p foo("hi", 2, 3, 4)
+p foo("meep", 2, 3, nil)
 p foo(1, 2, 3, 4)
-p Foo.new.bar(1, 2, 3, 4)
+#p Foo.new.bar(1, 2, 3, 4)
