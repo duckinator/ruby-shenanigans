@@ -1,10 +1,6 @@
 #!/usr/bin/env ruby
 
 class Any
-  def ===(arg)
-    true
-  end
-
   def self.===(arg)
     true
   end
