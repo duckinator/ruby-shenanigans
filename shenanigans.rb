@@ -7,17 +7,16 @@ def fuck(name)
   receiver_ = method_.receiver
   receiver_ = receiver_.class unless receiver_.is_a?(Module)
 
-  receiver_.class_eval do
-    define_method(name) do |*args|
-      args.each_with_index { |value, idx|
+  receiver_.module_exec do
+    define_method(name) do |*arg_values|
+      arg_values.each_with_index { |value, idx|
         binding.local_variable_set(arg_names[idx], value)
       }
       define_method(:arguments) do
-        arg_values = args
         arg_names.zip(arg_values).to_h
       end
 
-      method_.call(*args)
+      method_.call(*arg_values)
     end
   end
 end
